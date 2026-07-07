@@ -1,0 +1,24 @@
+{
+  "_comment": "This is the ONLY file you normally edit. Add or remove athletes here. 'league' must be one of: mlb, nfl, nba. 'team' is a fallback shown if live data can't be fetched; leave it blank and the live data will fill it in when available. 'espnId' is optional — leave blank and the script will look the player up by name. If a common name resolves to the wrong person, put their ESPN athlete ID here (the number in their espn.com profile URL) to lock it.",
+  "athletes": [
+    { "name": "Logan Webb",         "league": "mlb", "position": "SP",  "team": "San Francisco Giants", "hometown": "Rocklin",        "espnId": "" },
+    { "name": "Nick Madrigal",      "league": "mlb", "position": "INF", "team": "",                     "hometown": "Elk Grove",      "espnId": "" },
+    { "name": "Rowdy Tellez",       "league": "mlb", "position": "1B",  "team": "",                     "hometown": "Elk Grove",      "espnId": "" },
+    { "name": "Matt Manning",       "league": "mlb", "position": "RHP", "team": "",                     "hometown": "Elk Grove",      "espnId": "" },
+
+    { "name": "Brandon Aiyuk",      "league": "nfl", "position": "WR",  "team": "San Francisco 49ers",  "hometown": "Rocklin",        "espnId": "" },
+    { "name": "Jake Browning",      "league": "nfl", "position": "QB",  "team": "Cincinnati Bengals",   "hometown": "Folsom",         "espnId": "" },
+    { "name": "DaRon Bland",        "league": "nfl", "position": "CB",  "team": "Dallas Cowboys",       "hometown": "Sacramento",     "espnId": "" },
+    { "name": "Taron Johnson",      "league": "nfl", "position": "CB",  "team": "Buffalo Bills",        "hometown": "Sacramento",     "espnId": "" },
+    { "name": "Kolton Miller",      "league": "nfl", "position": "OT",  "team": "Las Vegas Raiders",    "hometown": "Roseville",      "espnId": "" },
+    { "name": "Cam Skattebo",       "league": "nfl", "position": "RB",  "team": "New York Giants",      "hometown": "Rio Linda",      "espnId": "" },
+    { "name": "Carl Granderson",    "league": "nfl", "position": "DE",  "team": "New Orleans Saints",   "hometown": "Sacramento",     "espnId": "" },
+    { "name": "Henry To'oTo'o",     "league": "nfl", "position": "LB",  "team": "Houston Texans",       "hometown": "Sacramento",     "espnId": "" },
+    { "name": "Marte Mapu",         "league": "nfl", "position": "S",   "team": "New England Patriots", "hometown": "Sacramento",     "espnId": "" },
+    { "name": "Femi Oladejo",       "league": "nfl", "position": "LB",  "team": "Tennessee Titans",     "hometown": "Elk Grove",      "espnId": "" },
+    { "name": "Omarr Norman-Lott",  "league": "nfl", "position": "DT",  "team": "Kansas City Chiefs",   "hometown": "North Highlands","espnId": "" },
+    { "name": "Ahkello Witherspoon","league": "nfl", "position": "CB",  "team": "",                     "hometown": "Sacramento",     "espnId": "" },
+
+    { "name": "Jaylen Wells",       "league": "nba", "position": "G/F", "team": "Memphis Grizzlies",    "hometown": "Sacramento",     "espnId": "" }
+  ]
+}
