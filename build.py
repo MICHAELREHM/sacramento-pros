@@ -2,23 +2,31 @@
 """
 Build the "Sacramento's Pros" page.
 
-What it does:
-  1. Reads roster.json (your curated list of hometown athletes).
-  2. For each athlete, tries to pull their CURRENT team + a headline stat line
-     from ESPN's public JSON endpoints. This is best-effort: if anything fails,
-     the athlete still appears using the fallback info in roster.json.
-  3. Writes a clean, brand-styled public/index.html ready for GitHub Pages.
+Pipeline:
+  1. Read roster.json (your curated list of hometown athletes).
+  2. Resolve each athlete to their ESPN athlete id (via a per-league active-player
+     index, or an espnId you pin in roster.json).
+  3. Pull their CURRENT team + a headline stat line from ESPN's athlete endpoint.
+  4. Render a clean, brand-styled public/index.html for GitHub Pages.
 
-Design principle: the page must ALWAYS render. Network hiccups, an ESPN API
-change, or a name that doesn't resolve should never blank the page — they just
-mean that one athlete shows without a live stat line. Nothing here is invented;
-if a stat can't be fetched, it's simply left off.
+Everything network-related is best-effort and defensive: if a lookup fails, the
+athlete still appears using the fallback info in roster.json. The page ALWAYS
+renders. Nothing is invented — a missing stat is simply left off.
+
+ESPN endpoints (confirmed shapes):
+  - Active index: https://sports.core.api.espn.com/v3/sports/{sport}/{league}/athletes?limit=20000&active=true
+       -> {"items":[{"id","fullName","displayName","active"}, ...]}
+  - Athlete:      https://site.web.api.espn.com/apis/common/v3/sports/{sport}/{league}/athletes/{id}
+       -> {"athlete":{"team":{"displayName"}, "statsSummary":{"statistics":[
+              {"abbreviation","shortDisplayName","displayName","displayValue"}, ...]}}}
 """
 
+import os
+import re
 import json
 import html
+import unicodedata
 import datetime
-import urllib.parse
 
 import requests
 
@@ -26,154 +34,152 @@ import requests
 # Config
 # ---------------------------------------------------------------------------
 
-# Maps our simple league codes to ESPN's (sport, league) path segments.
 SPORT_PATHS = {
     "mlb": ("baseball", "mlb"),
     "nfl": ("football", "nfl"),
     "nba": ("basketball", "nba"),
 }
 
-# Display order + friendly section headings.
-SECTIONS = [
-    ("mlb", "Baseball"),
-    ("nfl", "Football"),
-    ("nba", "Basketball"),
-]
+SECTIONS = [("mlb", "Baseball"), ("nfl", "Football"), ("nba", "Basketball")]
 
-# Brand palette (matches the real estate site).
 NAVY = "#1F3A5F"
 BROWN = "#8A5A1F"
 
-TIMEOUT = 12
-HEADERS = {
-    # A normal-looking UA; ESPN's public endpoints are friendlier with one.
-    "User-Agent": "Mozilla/5.0 (compatible; SacProsBot/1.0; +https://github.com)"
-}
+TIMEOUT = 25
+HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; SacProsBot/1.0)"}
 
 SESSION = requests.Session()
 SESSION.headers.update(HEADERS)
 
+# Cache of {league_code: {normalized_name: id}} so we fetch each index once.
+_INDEX_CACHE = {}
+
 
 # ---------------------------------------------------------------------------
-# ESPN helpers  (all wrapped so they NEVER raise up to the caller)
+# Helpers
 # ---------------------------------------------------------------------------
 
 def _get_json(url):
-    """GET a URL and return parsed JSON, or None on any problem."""
     try:
         r = SESSION.get(url, timeout=TIMEOUT)
         if r.status_code != 200:
+            print(f"  [warn] {r.status_code} for {url[:80]}")
             return None
         return r.json()
-    except Exception:
+    except Exception as e:
+        print(f"  [warn] fetch failed ({e}) for {url[:80]}")
         return None
 
 
-def _walk(obj):
-    """Yield every dict nested anywhere inside a JSON structure."""
-    if isinstance(obj, dict):
-        yield obj
-        for v in obj.values():
-            yield from _walk(v)
-    elif isinstance(obj, list):
-        for v in obj:
-            yield from _walk(v)
+def norm(name):
+    """Normalize a name for matching: lowercase, strip accents & punctuation."""
+    if not name:
+        return ""
+    n = unicodedata.normalize("NFKD", name)
+    n = "".join(c for c in n if not unicodedata.combining(c))
+    n = n.lower()
+    n = re.sub(r"[.\-'’]", "", n)      # drop periods, hyphens, apostrophes
+    n = re.sub(r"\s+", " ", n).strip()
+    return n
 
 
-def resolve_espn_id(name, league):
-    """
-    Try to find an athlete's ESPN id by name, restricted to the right league.
-    Returns a string id or None. Structure-agnostic: we walk the whole search
-    response looking for a dict that clearly describes this athlete.
-    """
+def league_index(league):
+    """Return {normalized_name: id} for a league's active athletes (cached)."""
+    if league in _INDEX_CACHE:
+        return _INDEX_CACHE[league]
+
     sport, lg = SPORT_PATHS[league]
-    q = urllib.parse.quote(name)
-    data = _get_json(f"https://site.web.api.espn.com/apis/search/v2?limit=12&query={q}")
-    if not data:
-        return None
+    url = (f"https://sports.core.api.espn.com/v3/sports/{sport}/{lg}"
+           f"/athletes?limit=20000&active=true")
+    data = _get_json(url)
+    full_map, initial_map = {}, {}
+    if data and isinstance(data.get("items"), list):
+        for it in data["items"]:
+            _id = it.get("id")
+            full = it.get("fullName") or it.get("displayName") or ""
+            if not _id or not full.strip():
+                continue
+            active = bool(it.get("active"))
+            key = norm(full)
+            # Prefer active players when the same normalized name repeats.
+            if key and (key not in full_map or active):
+                full_map[key] = _id
+            # Secondary key: first initial + last name (helps Cam/Cameron etc.)
+            parts = key.split(" ")
+            if len(parts) >= 2:
+                ik = parts[0][0] + " " + parts[-1]
+                if ik not in initial_map or active:
+                    initial_map[ik] = _id
+        print(f"  [index] {league}: {len(full_map)} names loaded")
+    else:
+        print(f"  [index] {league}: index unavailable")
 
-    name_l = name.lower()
-    for d in _walk(data):
-        # An athlete result generally has an id, a display name, and some
-        # indication of its sport/league. We match defensively.
-        disp = str(d.get("displayName") or d.get("name") or "").lower()
-        if not disp or disp != name_l:
-            continue
-        blob = json.dumps(d).lower()
-        if lg in blob or sport in blob:
-            _id = d.get("id") or d.get("uid") or d.get("guid")
-            if _id:
-                # uid/guid sometimes look like "s:20~l:28~a:12345"; grab trailing digits.
-                s = str(_id)
-                if s.isdigit():
-                    return s
-                if "a:" in s:
-                    tail = s.split("a:")[-1]
-                    tail = "".join(ch for ch in tail if ch.isdigit())
-                    if tail:
-                        return tail
+    _INDEX_CACHE[league] = (full_map, initial_map)
+    return _INDEX_CACHE[league]
+
+
+def resolve_id(name, league, espn_id):
+    """espnId override -> exact name -> first-initial+last-name fallback."""
+    if espn_id and str(espn_id).strip():
+        return str(espn_id).strip()
+    full_map, initial_map = league_index(league)
+    key = norm(name)
+    if key in full_map:
+        return full_map[key]
+    parts = key.split(" ")
+    if len(parts) >= 2:
+        ik = parts[0][0] + " " + parts[-1]
+        if ik in initial_map:
+            return initial_map[ik]
     return None
 
 
-def fetch_athlete(league, espn_id):
-    """
-    Pull current team + a short list of headline stats for one athlete.
-    Returns {"team": str|None, "stats": [(label, value), ...]}.
-    Uses ESPN's own 'stats summary' so we don't hard-code which stats matter
-    per position — we just show what ESPN shows on the player's profile.
-    """
+def fetch_athlete(league, athlete_id):
+    """Return {'team': str|None, 'stats': [(label, value), ...]} for one id."""
     sport, lg = SPORT_PATHS[league]
+    url = (f"https://site.web.api.espn.com/apis/common/v3/sports/{sport}/{lg}"
+           f"/athletes/{athlete_id}")
     out = {"team": None, "stats": []}
-    data = _get_json(
-        f"https://site.web.api.espn.com/apis/common/v3/sports/{sport}/{lg}/athletes/{espn_id}"
-    )
+    data = _get_json(url)
     if not data:
         return out
 
-    # Current team: find a 'team' dict with a display name.
-    for d in _walk(data):
-        team = d.get("team")
-        if isinstance(team, dict):
-            tn = team.get("displayName") or team.get("name")
-            if tn:
-                out["team"] = tn
-                break
+    ath = data.get("athlete") if isinstance(data.get("athlete"), dict) else data
 
-    # Headline stats: ESPN uses a summary list of {label/displayName, displayValue}.
-    for d in _walk(data):
-        stats = d.get("statistics") or d.get("stats")
-        if isinstance(stats, list) and stats:
-            picked = []
-            for s in stats:
-                if not isinstance(s, dict):
-                    continue
-                label = s.get("label") or s.get("displayName") or s.get("name") or s.get("abbreviation")
-                value = s.get("displayValue") or s.get("value")
-                if label and value is not None:
-                    picked.append((str(label), str(value)))
-                if len(picked) >= 4:
-                    break
-            if picked:
-                out["stats"] = picked
-                break
+    team = ath.get("team")
+    if isinstance(team, dict):
+        out["team"] = team.get("displayName") or team.get("name")
 
+    summary = ath.get("statsSummary")
+    if isinstance(summary, dict) and isinstance(summary.get("statistics"), list):
+        for s in summary["statistics"][:4]:
+            if not isinstance(s, dict):
+                continue
+            label = (s.get("abbreviation") or s.get("shortDisplayName")
+                     or s.get("displayName") or s.get("name"))
+            value = s.get("displayValue")
+            if value in (None, "") and s.get("value") is not None:
+                value = s["value"]
+            if label and value not in (None, ""):
+                out["stats"].append((str(label), str(value)))
     return out
 
 
-def enrich(athlete):
-    """Add live team/stats to a roster entry, non-destructively."""
-    league = athlete.get("league")
+def enrich(a):
+    league = a.get("league")
+    a.setdefault("stats", [])
     if league not in SPORT_PATHS:
-        return athlete
-    espn_id = (athlete.get("espnId") or "").strip() or resolve_espn_id(athlete["name"], league)
-    if espn_id:
-        live = fetch_athlete(league, espn_id)
-        if live.get("team"):
-            athlete["team"] = live["team"]
-        athlete["stats"] = live.get("stats", [])
-    else:
-        athlete.setdefault("stats", [])
-    return athlete
+        return a
+    aid = resolve_id(a.get("name", ""), league, a.get("espnId"))
+    if not aid:
+        print(f"  [miss] {a.get('name')} — no id resolved")
+        return a
+    live = fetch_athlete(league, aid)
+    if live.get("team"):
+        a["team"] = live["team"]
+    a["stats"] = live.get("stats", [])
+    print(f"  [ok]   {a.get('name')} -> id {aid}, {len(a['stats'])} stats")
+    return a
 
 
 # ---------------------------------------------------------------------------
@@ -181,17 +187,15 @@ def enrich(athlete):
 # ---------------------------------------------------------------------------
 
 def esc(s):
-    return html.escape(str(s or ""))
+    return html.escape(str(s if s is not None else ""))
 
 
 def card_html(a):
     stats = a.get("stats") or []
-    stat_chips = "".join(
+    chips = "".join(
         f'<span class="stat"><b>{esc(v)}</b> {esc(label)}</span>'
         for (label, v) in stats
-    )
-    if not stat_chips:
-        stat_chips = '<span class="stat muted">stats update on game days</span>'
+    ) or '<span class="stat muted">stats update on game days</span>'
     team = esc(a.get("team")) or "—"
     return f"""
       <article class="card">
@@ -200,23 +204,19 @@ def card_html(a):
           <span class="pos">{esc(a.get('position'))}</span>
         </div>
         <div class="team">{team}</div>
-        <div class="stats">{stat_chips}</div>
+        <div class="stats">{chips}</div>
         <div class="home">Sacramento roots: {esc(a.get('hometown'))}</div>
       </article>"""
 
 
 def render(athletes, updated):
-    sections_html = ""
+    body = ""
     for code, title in SECTIONS:
         group = [a for a in athletes if a.get("league") == code]
         if not group:
             continue
         cards = "".join(card_html(a) for a in group)
-        sections_html += f"""
-      <section>
-        <h2>{esc(title)}</h2>
-        <div class="grid">{cards}</div>
-      </section>"""
+        body += f'\n      <section>\n        <h2>{esc(title)}</h2>\n        <div class="grid">{cards}</div>\n      </section>'
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -227,13 +227,10 @@ def render(athletes, updated):
 <style>
   :root {{ --navy:{NAVY}; --brown:{BROWN}; }}
   * {{ box-sizing:border-box; }}
-  body {{
-    margin:0; padding:24px;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Lato,"Helvetica Neue",Arial,sans-serif;
-    color:#222; background:#fff; line-height:1.45;
-  }}
+  body {{ margin:0; padding:24px; color:#222; background:#fff; line-height:1.45;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Lato,"Helvetica Neue",Arial,sans-serif; }}
   header.page {{ border-bottom:3px solid var(--brown); padding-bottom:14px; margin-bottom:22px; }}
-  header.page h1 {{ margin:0; color:var(--navy); font-size:1.7rem; letter-spacing:.2px; }}
+  header.page h1 {{ margin:0; color:var(--navy); font-size:1.7rem; }}
   header.page p {{ margin:6px 0 0; color:#555; font-size:.95rem; }}
   h2 {{ color:var(--navy); border-left:5px solid var(--brown); padding-left:10px; margin:26px 0 12px; font-size:1.25rem; }}
   .grid {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; }}
@@ -248,18 +245,16 @@ def render(athletes, updated):
   .stat.muted {{ color:#999; font-style:italic; border-style:dashed; }}
   .home {{ font-size:.78rem; color:#777; border-top:1px dashed #ddd; padding-top:7px; }}
   footer.page {{ margin-top:28px; padding-top:12px; border-top:1px solid #eee; color:#888; font-size:.8rem; }}
-  footer.page a {{ color:var(--brown); }}
 </style>
 </head>
 <body>
   <header class="page">
     <h1>Sacramento's Pros</h1>
     <p>Active professional athletes with Sacramento-area roots — where they play now, and how they're doing.</p>
-  </header>
-  {sections_html}
+  </header>{body}
   <footer class="page">
     Updated {esc(updated)}. Team &amp; stats via public sports data; roster curated by Michael Rehm.
-    Where a stat line is still loading, it will populate as the season's games are played.
+    Off-season stat lines reflect the most recent completed season.
   </footer>
 </body>
 </html>
@@ -273,21 +268,20 @@ def render(athletes, updated):
 def main():
     with open("roster.json", "r", encoding="utf-8") as f:
         roster = json.load(f)
-
     athletes = roster.get("athletes", [])
+
+    print(f"Enriching {len(athletes)} athletes...")
     for a in athletes:
         try:
             enrich(a)
-        except Exception:
-            a.setdefault("stats", [])  # never let one athlete break the build
+        except Exception as e:
+            print(f"  [error] {a.get('name')}: {e}")
+            a.setdefault("stats", [])
 
     updated = datetime.datetime.now(datetime.timezone.utc).strftime("%B %d, %Y at %H:%M UTC")
-    page = render(athletes, updated)
-
-    import os
     os.makedirs("public", exist_ok=True)
     with open("public/index.html", "w", encoding="utf-8") as f:
-        f.write(page)
+        f.write(render(athletes, updated))
     print(f"Built public/index.html with {len(athletes)} athletes.")
 
 
