@@ -1,32 +1,213 @@
 {
   "_comment": "This is the ONLY file you normally edit. Add or remove athletes here. 'league' must be one of: mlb, nfl, nba. 'team' is a fallback shown if live data can't be fetched; leave it blank and live data fills it in. 'espnId' is optional -- leave blank and the script looks the player up by name; if a common name resolves to the wrong person, paste the number from their espn.com profile URL to lock it. Baseball section verified against the Sacramento Bee's March 2026 'locals on MLB rosters' article and Baseball Almanac birthplaces.",
   "athletes": [
-    { "name": "Logan Webb",         "league": "mlb", "position": "SP",   "team": "San Francisco Giants", "hometown": "Rocklin",                    "espnId": "" },
-    { "name": "Nick Mears",         "league": "mlb", "position": "RP",   "team": "Kansas City Royals",   "hometown": "Rocklin High School",        "espnId": "" },
-    { "name": "Daniel Susac",       "league": "mlb", "position": "C",    "team": "San Francisco Giants", "hometown": "Jesuit High School",         "espnId": "" },
-    { "name": "Rhys Hoskins",       "league": "mlb", "position": "1B",   "team": "Cleveland Guardians",  "hometown": "Jesuit High School",         "espnId": "" },
-    { "name": "Dylan Carlson",      "league": "mlb", "position": "OF",   "team": "Chicago Cubs",         "hometown": "Elk Grove High School",      "espnId": "" },
-    { "name": "Derek Hill",         "league": "mlb", "position": "OF",   "team": "Chicago White Sox",    "hometown": "Elk Grove High School",      "espnId": "" },
-    { "name": "Nathan Lukes",       "league": "mlb", "position": "OF",   "team": "Toronto Blue Jays",    "hometown": "Center High School",         "espnId": "" },
-    { "name": "Mauricio Dubón",     "league": "mlb", "position": "UTIL", "team": "Atlanta Braves",       "hometown": "Capital Christian High School","espnId": "" },
-    { "name": "James Outman",       "league": "mlb", "position": "OF",   "team": "Minnesota Twins",      "hometown": "Sacramento State",           "espnId": "" },
-    { "name": "Nick Madrigal",      "league": "mlb", "position": "INF",  "team": "Los Angeles Angels",   "hometown": "Elk Grove High School",      "espnId": "" },
-    { "name": "Rowdy Tellez",       "league": "mlb", "position": "1B",   "team": "Atlanta Braves",       "hometown": "Elk Grove High School",      "espnId": "" },
-    { "name": "Matt Manning",       "league": "mlb", "position": "RHP",  "team": "",                     "hometown": "Sacramento",                 "espnId": "" },
-
-    { "name": "Brandon Aiyuk",      "league": "nfl", "position": "WR",  "team": "San Francisco 49ers",  "hometown": "Rocklin",        "espnId": "" },
-    { "name": "Jake Browning",      "league": "nfl", "position": "QB",  "team": "Cincinnati Bengals",   "hometown": "Folsom",         "espnId": "" },
-    { "name": "DaRon Bland",        "league": "nfl", "position": "CB",  "team": "Dallas Cowboys",       "hometown": "Sacramento",     "espnId": "" },
-    { "name": "Taron Johnson",      "league": "nfl", "position": "CB",  "team": "Buffalo Bills",        "hometown": "Sacramento",     "espnId": "" },
-    { "name": "Kolton Miller",      "league": "nfl", "position": "OT",  "team": "Las Vegas Raiders",    "hometown": "Roseville",      "espnId": "" },
-    { "name": "Cam Skattebo",       "league": "nfl", "position": "RB",  "team": "New York Giants",      "hometown": "Rio Linda",      "espnId": "" },
-    { "name": "Carl Granderson",    "league": "nfl", "position": "DE",  "team": "New Orleans Saints",   "hometown": "Sacramento",     "espnId": "" },
-    { "name": "Henry To'oTo'o",     "league": "nfl", "position": "LB",  "team": "Houston Texans",       "hometown": "Sacramento",     "espnId": "" },
-    { "name": "Marte Mapu",         "league": "nfl", "position": "S",   "team": "New England Patriots", "hometown": "Sacramento",     "espnId": "" },
-    { "name": "Femi Oladejo",       "league": "nfl", "position": "LB",  "team": "Tennessee Titans",     "hometown": "Elk Grove",      "espnId": "" },
-    { "name": "Omarr Norman-Lott",  "league": "nfl", "position": "DT",  "team": "Kansas City Chiefs",   "hometown": "North Highlands","espnId": "" },
-    { "name": "Ahkello Witherspoon","league": "nfl", "position": "CB",  "team": "",                     "hometown": "Sacramento",     "espnId": "" },
-
-    { "name": "Jaylen Wells",       "league": "nba", "position": "G/F", "team": "Memphis Grizzlies",    "hometown": "Sacramento",     "espnId": "" }
+    {
+      "name": "Logan Webb",
+      "league": "mlb",
+      "position": "SP",
+      "team": "San Francisco Giants",
+      "hometown": "Rocklin High School",
+      "espnId": ""
+    },
+    {
+      "name": "Nick Mears",
+      "league": "mlb",
+      "position": "RP",
+      "team": "Kansas City Royals",
+      "hometown": "Rocklin High School",
+      "espnId": ""
+    },
+    {
+      "name": "Daniel Susac",
+      "league": "mlb",
+      "position": "C",
+      "team": "San Francisco Giants",
+      "hometown": "Jesuit High School",
+      "espnId": ""
+    },
+    {
+      "name": "Rhys Hoskins",
+      "league": "mlb",
+      "position": "1B",
+      "team": "Cleveland Guardians",
+      "hometown": "Jesuit High School",
+      "espnId": ""
+    },
+    {
+      "name": "Dylan Carlson",
+      "league": "mlb",
+      "position": "OF",
+      "team": "Chicago Cubs",
+      "hometown": "Elk Grove High School",
+      "espnId": ""
+    },
+    {
+      "name": "Derek Hill",
+      "league": "mlb",
+      "position": "OF",
+      "team": "Chicago White Sox",
+      "hometown": "Elk Grove High School",
+      "espnId": ""
+    },
+    {
+      "name": "Nathan Lukes",
+      "league": "mlb",
+      "position": "OF",
+      "team": "Toronto Blue Jays",
+      "hometown": "Center High School",
+      "espnId": ""
+    },
+    {
+      "name": "Mauricio Dubón",
+      "league": "mlb",
+      "position": "UTIL",
+      "team": "Atlanta Braves",
+      "hometown": "Capital Christian High School",
+      "espnId": ""
+    },
+    {
+      "name": "James Outman",
+      "league": "mlb",
+      "position": "OF",
+      "team": "Minnesota Twins",
+      "hometown": "Sacramento State",
+      "espnId": ""
+    },
+    {
+      "name": "Nick Madrigal",
+      "league": "mlb",
+      "position": "INF",
+      "team": "Los Angeles Angels",
+      "hometown": "Elk Grove High School",
+      "espnId": ""
+    },
+    {
+      "name": "Rowdy Tellez",
+      "league": "mlb",
+      "position": "1B",
+      "team": "Atlanta Braves",
+      "hometown": "Elk Grove High School",
+      "espnId": ""
+    },
+    {
+      "name": "Matt Manning",
+      "league": "mlb",
+      "position": "RHP",
+      "team": "",
+      "hometown": "Sheldon High School",
+      "espnId": ""
+    },
+    {
+      "name": "Brandon Aiyuk",
+      "league": "nfl",
+      "position": "WR",
+      "team": "San Francisco 49ers",
+      "hometown": "Rocklin · Sierra College",
+      "espnId": ""
+    },
+    {
+      "name": "Jake Browning",
+      "league": "nfl",
+      "position": "QB",
+      "team": "Cincinnati Bengals",
+      "hometown": "Folsom High School",
+      "espnId": ""
+    },
+    {
+      "name": "DaRon Bland",
+      "league": "nfl",
+      "position": "CB",
+      "team": "Dallas Cowboys",
+      "hometown": "Sacramento State",
+      "espnId": ""
+    },
+    {
+      "name": "Taron Johnson",
+      "league": "nfl",
+      "position": "CB",
+      "team": "Buffalo Bills",
+      "hometown": "Sheldon High School",
+      "espnId": ""
+    },
+    {
+      "name": "Kolton Miller",
+      "league": "nfl",
+      "position": "OT",
+      "team": "Las Vegas Raiders",
+      "hometown": "Roseville High School",
+      "espnId": ""
+    },
+    {
+      "name": "Cam Skattebo",
+      "league": "nfl",
+      "position": "RB",
+      "team": "New York Giants",
+      "hometown": "Rio Linda High School · Sacramento State",
+      "espnId": ""
+    },
+    {
+      "name": "Carl Granderson",
+      "league": "nfl",
+      "position": "DE",
+      "team": "New Orleans Saints",
+      "hometown": "Grant Union High School",
+      "espnId": ""
+    },
+    {
+      "name": "Henry To'oTo'o",
+      "league": "nfl",
+      "position": "LB",
+      "team": "Houston Texans",
+      "hometown": "Sacramento",
+      "espnId": ""
+    },
+    {
+      "name": "Marte Mapu",
+      "league": "nfl",
+      "position": "S",
+      "team": "New England Patriots",
+      "hometown": "Sacramento State",
+      "espnId": ""
+    },
+    {
+      "name": "Femi Oladejo",
+      "league": "nfl",
+      "position": "LB",
+      "team": "Tennessee Titans",
+      "hometown": "Cosumnes Oaks High School",
+      "espnId": ""
+    },
+    {
+      "name": "Omarr Norman-Lott",
+      "league": "nfl",
+      "position": "DT",
+      "team": "Kansas City Chiefs",
+      "hometown": "Grant Union High School",
+      "espnId": ""
+    },
+    {
+      "name": "Ahkello Witherspoon",
+      "league": "nfl",
+      "position": "CB",
+      "team": "",
+      "hometown": "Christian Brothers High School",
+      "espnId": ""
+    },
+    {
+      "name": "Jaylen Wells",
+      "league": "nba",
+      "position": "G/F",
+      "team": "Memphis Grizzlies",
+      "hometown": "Folsom High School",
+      "espnId": ""
+    },
+    {
+      "name": "Jared McCain",
+      "league": "nba",
+      "position": "G",
+      "team": "Oklahoma City Thunder",
+      "hometown": "Sacramento (born)",
+      "espnId": "4683778"
+    }
   ]
 }
