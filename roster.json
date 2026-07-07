@@ -1,10 +1,18 @@
 {
-  "_comment": "This is the ONLY file you normally edit. Add or remove athletes here. 'league' must be one of: mlb, nfl, nba. 'team' is a fallback shown if live data can't be fetched; leave it blank and the live data will fill it in when available. 'espnId' is optional — leave blank and the script will look the player up by name. If a common name resolves to the wrong person, put their ESPN athlete ID here (the number in their espn.com profile URL) to lock it.",
+  "_comment": "This is the ONLY file you normally edit. Add or remove athletes here. 'league' must be one of: mlb, nfl, nba. 'team' is a fallback shown if live data can't be fetched; leave it blank and live data fills it in. 'espnId' is optional -- leave blank and the script looks the player up by name; if a common name resolves to the wrong person, paste the number from their espn.com profile URL to lock it. Baseball section verified against the Sacramento Bee's March 2026 'locals on MLB rosters' article and Baseball Almanac birthplaces.",
   "athletes": [
-    { "name": "Logan Webb",         "league": "mlb", "position": "SP",  "team": "San Francisco Giants", "hometown": "Rocklin",        "espnId": "" },
-    { "name": "Nick Madrigal",      "league": "mlb", "position": "INF", "team": "",                     "hometown": "Elk Grove",      "espnId": "" },
-    { "name": "Rowdy Tellez",       "league": "mlb", "position": "1B",  "team": "",                     "hometown": "Elk Grove",      "espnId": "" },
-    { "name": "Matt Manning",       "league": "mlb", "position": "RHP", "team": "",                     "hometown": "Elk Grove",      "espnId": "" },
+    { "name": "Logan Webb",         "league": "mlb", "position": "SP",   "team": "San Francisco Giants", "hometown": "Rocklin",                    "espnId": "" },
+    { "name": "Nick Mears",         "league": "mlb", "position": "RP",   "team": "Kansas City Royals",   "hometown": "Rocklin High School",        "espnId": "" },
+    { "name": "Daniel Susac",       "league": "mlb", "position": "C",    "team": "San Francisco Giants", "hometown": "Jesuit High School",         "espnId": "" },
+    { "name": "Rhys Hoskins",       "league": "mlb", "position": "1B",   "team": "Cleveland Guardians",  "hometown": "Jesuit High School",         "espnId": "" },
+    { "name": "Dylan Carlson",      "league": "mlb", "position": "OF",   "team": "Chicago Cubs",         "hometown": "Elk Grove High School",      "espnId": "" },
+    { "name": "Derek Hill",         "league": "mlb", "position": "OF",   "team": "Chicago White Sox",    "hometown": "Elk Grove High School",      "espnId": "" },
+    { "name": "Nathan Lukes",       "league": "mlb", "position": "OF",   "team": "Toronto Blue Jays",    "hometown": "Center High School",         "espnId": "" },
+    { "name": "Mauricio Dubón",     "league": "mlb", "position": "UTIL", "team": "Atlanta Braves",       "hometown": "Capital Christian High School","espnId": "" },
+    { "name": "James Outman",       "league": "mlb", "position": "OF",   "team": "Minnesota Twins",      "hometown": "Sacramento State",           "espnId": "" },
+    { "name": "Nick Madrigal",      "league": "mlb", "position": "INF",  "team": "Los Angeles Angels",   "hometown": "Elk Grove High School",      "espnId": "" },
+    { "name": "Rowdy Tellez",       "league": "mlb", "position": "1B",   "team": "Atlanta Braves",       "hometown": "Elk Grove High School",      "espnId": "" },
+    { "name": "Matt Manning",       "league": "mlb", "position": "RHP",  "team": "",                     "hometown": "Sacramento",                 "espnId": "" },
 
     { "name": "Brandon Aiyuk",      "league": "nfl", "position": "WR",  "team": "San Francisco 49ers",  "hometown": "Rocklin",        "espnId": "" },
     { "name": "Jake Browning",      "league": "nfl", "position": "QB",  "team": "Cincinnati Bengals",   "hometown": "Folsom",         "espnId": "" },
