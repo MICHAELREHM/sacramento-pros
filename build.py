@@ -481,42 +481,71 @@ def render(athletes, updated):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sacramento's Pros</title>
 <style>
-  :root {{ --navy:#1F3A5F; --brown:#8A5A1F; }}
+  :root {{
+    --bg:#ffffff; --fg:#232323; --muted:#8a8a8a; --line:#ececec; --row-alt:#f7f8fa;
+    --accent:#8A5A1F; --title:#1F3A5F; --thead-bg:#1F3A5F; --thead-bg2:#274a73; --thead-fg:#ffffff;
+    --btn-bg:#1F3A5F; --btn-fg:#ffffff;
+  }}
+  html[data-theme="dark"] {{
+    --bg:#12161c; --fg:#e7e9ec; --muted:#9aa3ad; --line:#2a313a; --row-alt:#181f28;
+    --accent:#cf9d5b; --title:#8fb2e0; --thead-bg:#1b2836; --thead-bg2:#243449; --thead-fg:#e9edf2;
+    --btn-bg:#243449; --btn-fg:#e9edf2;
+  }}
   * {{ box-sizing:border-box; }}
-  body {{ margin:0; padding:20px; color:#222; background:#fff; line-height:1.3;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Lato,"Helvetica Neue",Arial,sans-serif; }}
-  header.page {{ border-bottom:3px solid var(--brown); padding-bottom:12px; margin-bottom:18px; }}
-  header.page h1 {{ margin:0; color:var(--navy); font-size:1.6rem; }}
-  header.page p {{ margin:6px 0 0; color:#555; font-size:.92rem; }}
+  body {{ margin:0; padding:20px; color:var(--fg); background:var(--bg); line-height:1.3;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Lato,"Helvetica Neue",Arial,sans-serif;
+    transition:background .2s ease, color .2s ease; }}
+  header.page {{ border-bottom:3px solid var(--accent); padding-bottom:12px; margin-bottom:18px; }}
+  .head-row {{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }}
+  header.page h1 {{ margin:0; color:var(--title); font-size:1.6rem; }}
+  header.page p {{ margin:6px 0 0; color:var(--muted); font-size:.92rem; max-width:62ch; }}
+  .head-meta {{ text-align:right; white-space:nowrap; }}
+  .updated-top {{ color:var(--muted); font-size:.76rem; margin-top:8px; }}
+  .themebtn {{ cursor:pointer; border:1px solid var(--line); background:var(--btn-bg); color:var(--btn-fg);
+    font-size:.76rem; padding:6px 12px; border-radius:6px; font-weight:600; }}
+  .themebtn:hover {{ opacity:.9; }}
   section {{ margin-bottom:24px; }}
-  h2 {{ color:var(--navy); border-left:5px solid var(--brown); padding-left:9px;
+  h2 {{ color:var(--title); border-left:5px solid var(--accent); padding-left:9px;
     margin:20px 0 10px; font-size:1.25rem; }}
-  table.box {{ border-collapse:collapse; width:auto; max-width:100%; margin:0 0 18px;
-    font-size:.85rem; }}
-  caption {{ text-align:left; caption-side:top; font-weight:700; color:var(--brown);
+  table.box {{ border-collapse:collapse; width:auto; max-width:100%; margin:0 0 18px; font-size:.85rem; }}
+  caption {{ text-align:left; caption-side:top; font-weight:700; color:var(--accent);
     padding:2px 2px 6px; font-size:.72rem; text-transform:uppercase; letter-spacing:.6px; }}
-  thead th {{ background:var(--navy); color:#fff; font-weight:600; padding:5px 10px;
+  thead th {{ background:var(--thead-bg); color:var(--thead-fg); font-weight:600; padding:5px 10px;
     text-align:right; font-size:.72rem; text-transform:uppercase; letter-spacing:.3px; white-space:nowrap; }}
   thead th.id {{ text-align:left; }}
-  thead th.grp {{ text-align:center; border-left:1px solid #35527a; border-right:1px solid #35527a; background:#274a73; }}
-  tbody td {{ padding:6px 10px; border-bottom:1px solid #ececec; vertical-align:top;
-    text-align:right; white-space:nowrap; }}
+  thead th.grp {{ text-align:center; border-left:1px solid var(--thead-bg2); border-right:1px solid var(--thead-bg2); background:var(--thead-bg2); }}
+  tbody td {{ padding:6px 10px; border-bottom:1px solid var(--line); vertical-align:top; text-align:right; white-space:nowrap; }}
   tbody td.id {{ text-align:left; padding-right:22px; white-space:normal; max-width:230px; }}
-  tbody td.note {{ text-align:left; color:#9a9a9a; font-style:italic; }}
-  tbody tr:nth-child(even) {{ background:#f7f8fa; }}
+  tbody td.note {{ text-align:left; color:var(--muted); font-style:italic; }}
+  tbody tr:nth-child(even) {{ background:var(--row-alt); }}
   th.num, td.num {{ text-align:right; font-variant-numeric:tabular-nums; }}
-  .player {{ font-weight:700; color:var(--navy); display:block; line-height:1.15; white-space:normal; }}
-  .roots {{ display:block; font-weight:400; font-size:.74rem; color:#8a8a8a; margin-top:1px; white-space:normal; }}
-  td.season {{ color:#555; font-variant-numeric:tabular-nums; font-size:.82rem; padding-right:16px; }}
-  footer.page {{ margin-top:22px; padding-top:12px; border-top:1px solid #eee; color:#888; font-size:.76rem; }}
-  .legend {{ margin-bottom:8px; color:#555; }}
-  .legend b {{ color:var(--navy); font-weight:700; }}
+  .player {{ font-weight:700; color:var(--title); display:block; line-height:1.15; white-space:normal; }}
+  .roots {{ display:block; font-weight:400; font-size:.74rem; color:var(--muted); margin-top:1px; white-space:normal; }}
+  td.season {{ color:var(--muted); font-variant-numeric:tabular-nums; font-size:.82rem; padding-right:16px; }}
+  footer.page {{ margin-top:22px; padding-top:12px; border-top:1px solid var(--line); color:var(--muted); font-size:.76rem; }}
+  .legend {{ margin-bottom:8px; color:var(--muted); }}
+  .legend b {{ color:var(--title); font-weight:700; }}
 </style>
+<script>
+  (function(){{
+    var t=null; try {{ t=localStorage.getItem('sacpros-theme'); }} catch(e){{}}
+    if(!t) {{ t=(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'; }}
+    document.documentElement.setAttribute('data-theme', t);
+  }})();
+</script>
 </head>
 <body>
   <header class="page">
-    <h1>Sacramento's Pros</h1>
-    <p>Active professional athletes with Sacramento-area roots — where they play now, and how they're doing.</p>
+    <div class="head-row">
+      <div>
+        <h1>Sacramento's Pros</h1>
+        <p>Active professional athletes with Sacramento-area roots — where they play now, and how they're doing.</p>
+      </div>
+      <div class="head-meta">
+        <button id="themebtn" class="themebtn" onclick="toggleTheme()">Dark mode</button>
+        <div class="updated-top">Updated {esc(updated)}</div>
+      </div>
+    </div>
   </header>
   {body}
   <footer class="page">
@@ -524,6 +553,32 @@ def render(athletes, updated):
     Updated {esc(updated)}. Season stat lines &amp; current team via public sports data; roster curated by Michael Rehm.
     Off-season lines reflect the most recent completed season.
   </footer>
+  <script>
+    function toggleTheme(){{
+      var el=document.documentElement;
+      var cur=el.getAttribute('data-theme')==='dark'?'light':'dark';
+      el.setAttribute('data-theme',cur);
+      try {{ localStorage.setItem('sacpros-theme',cur); }} catch(e){{}}
+      var b=document.getElementById('themebtn');
+      if(b) b.textContent = cur==='dark' ? 'Light mode' : 'Dark mode';
+      if(typeof _sacProsPostHeight==='function') _sacProsPostHeight();
+    }}
+    window.addEventListener('load', function(){{
+      var b=document.getElementById('themebtn');
+      if(b) b.textContent = document.documentElement.getAttribute('data-theme')==='dark' ? 'Light mode' : 'Dark mode';
+    }});
+  </script>
+  <script>
+    // Tell a parent page (e.g. WordPress embed) how tall this content is,
+    // so the iframe can auto-size and never show an inner scrollbar.
+    function _sacProsPostHeight() {{
+      var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      try {{ parent.postMessage({{ sacProsHeight: h }}, "*"); }} catch (e) {{}}
+    }}
+    window.addEventListener("load", _sacProsPostHeight);
+    window.addEventListener("resize", _sacProsPostHeight);
+    setTimeout(_sacProsPostHeight, 400);
+  </script>
 </body>
 </html>
 """
